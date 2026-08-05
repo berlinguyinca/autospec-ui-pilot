@@ -44,23 +44,26 @@ Anything reading that code cannot tell a silent failure from an ordinary result.
 
 ## What the first run found
 
-Five defects, inside an hour of the repository existing. Four are recorded as fixtures in
-`known-gaps/`; the fifth is the exit-code collision above.
+Five defects, inside an hour of the repository existing. Four are fixed in
+[autospec#2964](https://github.com/berlinguyinca/autospec/pull/2964); one remains.
 
-| | |
+| | status |
 |---|---|
-| `UI_FIXED_VIEWPORT` over-fires | prose or a comment naming `user-scalable=no` is flagged, wherever it appears. The compliant page in this repository tripped it with a comment explaining that it *avoids* the directive. |
-| `UI_NO_REDUCED_MOTION` is silenced | any line containing the media-feature name sets the rule's file-level "guard present" flag — including a comment. `TODO: add prefers-reduced-motion` makes the finding disappear. A file looks compliant ever after. |
-| `UI_RAW_HEX` misses most hex | only a literal directly after the colon, or a whole quoted string, is matched. `border: 1px solid #ccc`, a gradient stop, and `var(--x, #333)` all pass. |
-| `UI_NO_REDUCED_MOTION` over-fires across files | a global reset plus unguarded components — the ordinary way to organise CSS — is reported, because the rule is decided per file. |
+| `UI_NO_REDUCED_MOTION` could be **silenced by a comment** — any line containing the media-feature name set the rule's "guard present" flag, so `TODO: add prefers-reduced-motion` removed the finding about the missing guard, and the file read as compliant from then on | fixed |
+| `UI_FIXED_VIEWPORT` over-fired on prose — the compliant page here tripped it with a comment explaining that it *avoids* `user-scalable=no` | fixed |
+| `UI_RAW_HEX` matched a literal only directly after the colon, missing `border: 1px solid #ccc`, gradient stops, `var()` fallbacks, and the 8-digit alpha form | fixed |
+| `lint-ui.sh` exited 2 for both "the interpreter died" and "this file has two findings" | fixed, now 99 |
+| `UI_NO_REDUCED_MOTION` over-fires across files — a global reset with unguarded components, the ordinary way to organise CSS, is still reported | open |
 
-The first two share a cause: the rules read comments as code. Stripping comment spans
-before matching would close both, and would turn the silencing case from a lost
-accessibility finding into a reported one.
+The first two shared a cause: the rules read comments as code. The silencing one is the
+one worth remembering — a false positive costs an afternoon, that one lost an
+accessibility finding quietly. It surfaced because the corpus's *intended*
+`UI_NO_REDUCED_MOTION` violation came back clean: the comment explaining what was missing
+was itself what suppressed the finding.
 
-The third and fourth are separate. Widening the hex pattern is contained. Deciding motion
-across files is not: the rule would need the set of stylesheets that load together, which
-a one-awk-pass-per-file design does not have.
+The open case needs the set of stylesheets that load together, which a
+one-awk-pass-per-file design does not have. `fixtures/known-gaps/card-motion.css` holds it
+so the day it changes is visible.
 
 ## The compliant page is not a demo
 
