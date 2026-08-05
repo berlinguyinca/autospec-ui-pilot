@@ -1,0 +1,107 @@
+/* Components. Every :hover treatment has a :focus-visible equivalent, so keyboard and
+   touch users get the same affordance — the gate checks for that pairing per file.
+   Transitions here are colour and opacity only, which the motion rule correctly does not
+   treat as motion; nothing moves, so no reduced-motion fallback is required. */
+
+body {
+  margin: 0;
+  padding: var(--space-6);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.5;
+}
+
+/* Reflow at 320px without a horizontal scrollbar (WCAG 1.4.10), and readable at 200%
+   zoom (1.4.4), which is why the container is capped in ch rather than px. */
+.layout {
+  max-width: 72ch;
+  margin: 0 auto;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip-link:focus-visible {
+  position: static;
+  display: inline-block;
+  padding: var(--space-2);
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+
+.panel {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--space-2);
+  padding: var(--space-4);
+  z-index: var(--z-raised);
+}
+
+.panel__row {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* Target size: 44px on the shortest side, so the control is usable on a touch screen
+   (WCAG 2.5.8 asks 24px; 44px is the comfortable figure). */
+.button {
+  min-height: 44px;
+  min-width: 44px;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--space-1);
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  font: inherit;
+  cursor: pointer;
+  transition: background-color var(--duration-quick) var(--ease-move);
+}
+
+.button:hover {
+  background: var(--color-focus);
+}
+
+.button:focus-visible {
+  /* Same treatment as hover, plus an outline offset so the ring is not clipped by an
+     ancestor (WCAG 2.4.11). Focus styling never animates. */
+  background: var(--color-focus);
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.link {
+  color: var(--color-accent);
+  text-underline-offset: 2px;
+}
+
+.link:hover,
+.link:focus-visible {
+  text-decoration-thickness: 2px;
+}
+
+/* Coarse pointers get the larger target and no hover-dependent affordance at all. */
+@media (pointer: coarse) {
+  .button {
+    min-height: 48px;
+    padding: var(--space-3) var(--space-4);
+  }
+}
+
+@media (any-hover: none) {
+  .panel__row {
+    padding: var(--space-3) 0;
+  }
+}
+
+/* Safe-area insets so content clears a notch or home indicator. */
+@supports (padding: env(safe-area-inset-bottom)) {
+  body {
+    padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom));
+  }
+}

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Prose that names a banned directive</title>
+  </head>
+  <body>
+    <h1>Documenting what not to do</h1>
+
+    <!-- UI_FIXED_VIEWPORT fires on the paragraph below, not on the meta tag above. The
+         viewport here is correct and permits zoom; the rule matches the directive name
+         wherever it appears, including inside prose and comments.
+
+         Found while writing this repository's compliant reference page, whose comment
+         explained that it avoids user-scalable — and was flagged for saying so. Any
+         codebase that documents its accessibility decisions in comments, or hosts a
+         style guide that names the anti-pattern, meets this immediately.
+
+         The fix is for the rule to skip HTML comments and CSS comment spans before
+         matching, the same way a linter should not read its own prose as code. -->
+    <p>
+      Never set the viewport with user-scalable=no or maximum-scale=1: both prevent a
+      reader from zooming, which fails WCAG 1.4.4.
+    </p>
+  </body>
+</html>

@@ -1,0 +1,14 @@
+/* One half of the cross-file case. A project-wide reduced-motion reset, which is how most
+   codebases handle the preference: state it once, globally, and let components animate
+   freely. This file declares no motion of its own, so no rule fires here. */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

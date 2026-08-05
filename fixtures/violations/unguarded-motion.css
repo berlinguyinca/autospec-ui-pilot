@@ -1,0 +1,24 @@
+/* Expect: UI_NO_REDUCED_MOTION. Real movement — a transform transition and a keyframed
+   translate — with no fallback anywhere in the file for a viewer who has asked their
+   system to reduce motion, so they get the full slide regardless (WCAG 2.3.3).
+
+   This comment deliberately does not spell out the media-feature name. Doing so sets the
+   rule's file-level flag and silences the finding, which is the defect recorded in
+   fixtures/known-gaps/comment-silences-motion.css. */
+
+@keyframes drawer-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.drawer {
+  animation: drawer-in 240ms ease-out both;
+}
+
+.drawer__handle {
+  transition: transform 180ms ease-out;
+}

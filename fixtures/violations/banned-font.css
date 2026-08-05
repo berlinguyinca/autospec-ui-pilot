@@ -1,0 +1,6 @@
+/* Expect: UI_BANNED_FONT. A generic stack renders differently on every platform, which
+   is the opposite of what a type token is for. */
+
+.prose {
+  font-family: Inter, Helvetica, sans-serif;
+}

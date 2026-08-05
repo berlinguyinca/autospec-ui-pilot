@@ -1,0 +1,7 @@
+/* Expect: UI_RAW_HEX (twice). A literal colour bypasses the token layer, so changing a
+   theme means hunting through components instead of editing one file. */
+
+.badge {
+  color: #3355ff;
+  border: 1px solid #ccc;
+}

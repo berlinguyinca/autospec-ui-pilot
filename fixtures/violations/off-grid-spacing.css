@@ -1,0 +1,7 @@
+/* Expect: UI_OFF_GRID_SPACING (twice). 13px and 7px sit off the 4px rhythm, so this
+   block aligns with nothing else on the page. */
+
+.card {
+  padding: 13px;
+  margin-bottom: 7px;
+}

@@ -1,0 +1,22 @@
+/* A false negative. Every declaration here contains a raw hex colour, and none is
+   reported: UI_RAW_HEX matches a hex literal only where it follows the colon directly,
+   or where it is a whole quoted string.
+
+   Shorthand and multi-value properties are where colours usually sit, so the rule catches
+   the tidiest case and misses the common ones. Found by writing a fixture with two hex
+   literals and getting one finding.
+
+   The single-value form in fixtures/violations/raw-hex.css is reported, which is why that
+   file stays the positive case and this one records the gap. */
+
+.chip {
+  border: 1px solid #cccccc;
+  box-shadow: 0 1px 2px #00000022;
+  background: linear-gradient(to bottom, #ffffff, #eeeeee);
+  outline: 2px dashed #ff0000;
+}
+
+.chip__label {
+  /* Even a single value is missed once a function wraps it. */
+  color: var(--label-color, #333333);
+}

@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!-- Expect: UI_FIXED_VIEWPORT, twice. Either directive alone defeats zoom, and this
+         page uses both. A viewer who needs 200% text has no way to get it (WCAG 1.4.4). -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
+    <title>Zoom-blocking viewport</title>
+  </head>
+  <body>
+    <p>This page pins the viewport scale.</p>
+  </body>
+</html>

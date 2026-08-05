@@ -1,0 +1,11 @@
+/* Expect: UI_HOVER_ONLY_AFFORDANCE. The only cue that this row is interactive appears on
+   hover, so a keyboard user never sees it and a touch user cannot produce it at all. */
+
+.row:hover {
+  background: var(--color-surface-raised);
+  outline: 1px solid var(--color-border);
+}
+
+.row__action:hover {
+  text-decoration: underline;
+}

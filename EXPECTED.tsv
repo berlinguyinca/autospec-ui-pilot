@@ -1,0 +1,34 @@
+# The calibration contract for autospec's UI gates, measured against scripts/lint-ui.sh
+# at berlinguyinca/autospec commit d3e0fbd3 (2026-08-05).
+#
+# verdict:
+#   correct   the rule fires where it should, or stays quiet where it should
+#   over-fire the rule fires on code that is not a defect  (false positive)
+#   missed    the rule stays quiet on code that is a defect (false negative)
+#
+# A rule id of "-" means no finding is expected for that file. Re-run
+# scripts/lint-ui.sh over these paths and diff against this table: a row that changes
+# verdict is either a regression or a fix, and either way wants a look.
+#
+# path	rule	verdict	note
+
+index.html	-	correct	compliant reference: zoomable viewport, labelled controls, skip link
+styles/tokens.css	-	correct	oklch colour, 4px spacing scale, non-generic type stack
+styles/components.css	-	correct	every :hover paired with :focus-visible; colour-only transitions
+styles/motion.css	-	correct	movement with its reduced-motion fallback in the same file
+
+fixtures/violations/raw-hex.css	UI_RAW_HEX	correct	hex directly after the colon is caught
+fixtures/violations/off-grid-spacing.css	UI_OFF_GRID_SPACING	correct	13px and 7px both reported
+fixtures/violations/ad-hoc-zindex.css	UI_AD_HOC_ZINDEX	correct	9999 is outside the layer scale
+fixtures/violations/banned-font.css	UI_BANNED_FONT	correct	Inter and Helvetica both banned
+fixtures/violations/unguarded-motion.css	UI_NO_REDUCED_MOTION	correct	movement, no guard in file
+fixtures/violations/infinite-spinner.css	UI_INFINITE_ANIMATION	correct	both infinite forms reported
+fixtures/violations/infinite-spinner.css	UI_NO_REDUCED_MOTION	correct	unguarded as well as infinite
+fixtures/violations/hover-only.css	UI_HOVER_ONLY_AFFORDANCE	correct	no :focus anywhere in the file
+fixtures/violations/fixed-viewport.html	UI_FIXED_VIEWPORT	correct	one finding per line, both directives on one line
+
+fixtures/known-gaps/global-reset.css	-	correct	a guard with no motion of its own draws nothing
+fixtures/known-gaps/card-motion.css	UI_NO_REDUCED_MOTION	over-fire	guard lives in global-reset.css; the rule is per-file
+fixtures/known-gaps/viewport-prose.html	UI_FIXED_VIEWPORT	over-fire	matched the directive name inside prose, not the meta tag
+fixtures/known-gaps/comment-silences-motion.css	UI_NO_REDUCED_MOTION	missed	a comment naming the media feature sets the guard flag
+fixtures/known-gaps/hex-not-first-token.css	UI_RAW_HEX	missed	hex inside shorthand, a function, or a gradient is not matched

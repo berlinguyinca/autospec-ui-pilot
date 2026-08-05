@@ -1,0 +1,37 @@
+/* A false negative, and the most consequential gap in the corpus.
+
+   This file moves things — a keyframed translate and a transform transition — and has no
+   guard. UI_NO_REDUCED_MOTION should fire. It does not, because the comment below names
+   the media feature, and the rule sets its file-level "guard present" flag on any line
+   containing that string, comment or not.
+
+   So a note about the missing guard silences the finding about the missing guard. The
+   phrasing that does it is the phrasing a developer would naturally reach for:
+
+       TODO: add prefers-reduced-motion here
+
+   Found by running the gate over this repository's own fixtures: the intended
+   UI_NO_REDUCED_MOTION violation came back clean because its explanatory comment said
+   what was missing.
+
+   A false positive wastes someone's afternoon. This loses an accessibility finding
+   silently, and the file looks compliant to the gate ever after. The fix is the same as
+   for fixtures/known-gaps/viewport-prose.html — strip comments before matching — which
+   would close both directions at once. */
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.sheet {
+  animation: sheet-up 260ms ease-out both;
+}
+
+.sheet__grabber {
+  transition: transform 140ms ease-out;
+}

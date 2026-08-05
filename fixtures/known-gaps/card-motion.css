@@ -1,0 +1,29 @@
+/* The other half. This component animates and has no guard of its own, so
+   UI_NO_REDUCED_MOTION fires — but global-reset.css in this same directory already
+   honours the preference for every element on the page. The finding is a false positive.
+
+   This is the rule's main limitation, and it is not exotic: a global reset plus
+   unguarded components is the ordinary way to organise CSS. A project adopting the gate
+   will meet this on its first run.
+
+   Fixing it means the rule can no longer be decided per file — it needs the set of
+   stylesheets that load together, which the current one-awk-pass-per-file design does
+   not have. Until then the honest position is that this rule over-fires here, which is
+   why the case is checked in rather than described in an issue. */
+
+@keyframes card-lift {
+  from {
+    transform: translateY(4px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.card {
+  animation: card-lift 200ms ease-out both;
+}
+
+.card__thumb {
+  transition: transform 160ms ease-out;
+}

@@ -1,0 +1,22 @@
+/* Expect: UI_INFINITE_ANIMATION, and UI_NO_REDUCED_MOTION as well — an unguarded
+   infinite animation breaks both rules, and the corpus records both rather than
+   pretending each fixture is single-purpose.
+
+   WCAG 2.2.2 asks for a pause, stop or hide control for motion that runs past five
+   seconds. A spinner that never stops has none. */
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  animation: spin 900ms linear infinite;
+}
+
+.pulse {
+  animation-name: pulse;
+  animation-duration: 1.5s;
+  animation-iteration-count: infinite;
+}

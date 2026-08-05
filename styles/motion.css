@@ -1,0 +1,54 @@
+/* Motion, with its reduced-motion fallback in the same file.
+   Co-location is deliberate: UI_NO_REDUCED_MOTION is a whole-file rule, so a guard kept
+   in a separate global stylesheet does not clear it. See fixtures/known-over-fire/ for
+   the case that arrangement produces. */
+
+@keyframes panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes row-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Choreography: the panel settles first, then its rows follow in sequence. One shared
+   stagger step keeps the cascade legible rather than arbitrary. */
+.panel {
+  animation: panel-enter var(--duration-settle) var(--ease-enter) both;
+}
+
+.panel__row {
+  animation: row-enter var(--duration-quick) var(--ease-enter) both;
+  animation-delay: calc(var(--row-index, 0) * 40ms);
+}
+
+.panel__row:nth-child(n + 9) {
+  /* Past the eighth row the stagger stops rather than growing without bound — a long
+     cascade reads as latency, not as polish. */
+  animation-delay: 320ms;
+}
+
+/* Reduced motion: opacity-only, not absent. Removing the transition entirely makes
+   state changes appear to jump, which is its own accessibility problem; the WCAG 2.3.3
+   remedy is to drop the movement, not the feedback. */
+@media (prefers-reduced-motion: reduce) {
+  .panel,
+  .panel__row {
+    animation-name: none;
+    transition: opacity var(--duration-instant) linear;
+  }
+}

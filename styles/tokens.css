@@ -1,0 +1,51 @@
+/* Design tokens. Colour is expressed in oklch rather than hex so UI_RAW_HEX has
+   nothing to flag, and every spacing step is a multiple of 4px so UI_OFF_GRID_SPACING
+   stays quiet. Font stacks avoid the generic families the gate rejects. */
+
+:root {
+  /* Colour */
+  --color-surface: oklch(98% 0.005 250);
+  --color-surface-raised: oklch(100% 0 0);
+  --color-ink: oklch(22% 0.02 250);
+  --color-ink-muted: oklch(48% 0.02 250);
+  --color-accent: oklch(52% 0.16 250);
+  --color-accent-ink: oklch(99% 0 0);
+  --color-border: oklch(88% 0.01 250);
+  --color-focus: oklch(62% 0.19 250);
+
+  /* Spacing, 4px grid */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Type */
+  --font-body: Georgia, "Times New Roman", serif;
+  --font-mono: "SFMono-Regular", Consolas, monospace;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.75rem;
+
+  /* Motion: the duration scale and easings named by the ## Motion contract in
+     autospec-design. Three durations, one easing per intent. Anything outside this
+     scale is a design decision that belongs in DESIGN.md, not in a component. */
+  --duration-instant: 90ms;
+  --duration-quick: 180ms;
+  --duration-settle: 320ms;
+  --ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --ease-move: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Layering. The gate accepts only this scale. */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-sticky: 20;
+  --z-overlay: 100;
+}
+
+/* Never animates, per the ## Motion contract: focus indicators must appear instantly,
+   and text must not move while being read. Stated here so the rule is discoverable
+   rather than implied by the absence of animation elsewhere. */

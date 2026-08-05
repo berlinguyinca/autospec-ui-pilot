@@ -1,0 +1,7 @@
+/* Expect: UI_AD_HOC_ZINDEX. 9999 is the value people reach for when the layer scale is
+   not written down; the next person picks 10000. */
+
+.tooltip {
+  position: absolute;
+  z-index: 9999;
+}
