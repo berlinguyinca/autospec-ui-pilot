@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>aria-busy left set</title></head>
+<body>
+  <main>
+    <p id="status" role="status" aria-live="polite" aria-busy="true"></p>
+    <ul id="runs"><li>Nothing loaded yet.</li></ul>
+  </main>
+  <script>
+    // LIVE_REGION_STUCK_BUSY. The loading flag was set and never cleared, so the region is
+    // filled but a screen reader is still told to wait — the announcement is suppressed
+    // indefinitely. Compare states.html, which clears it and declares the one state where
+    // staying busy is correct.
+    window.__autospec = {
+      setState() {
+        document.getElementById('runs').innerHTML = '<li>run-104 passed</li>';
+        document.getElementById('status').textContent = 'Loaded 1 run.';
+      },
+    };
+  </script>
+</body>
+</html>

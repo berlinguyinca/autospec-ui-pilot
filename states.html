@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Runs — the announcement reference</title>
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/components.css">
+</head>
+<body>
+  <main>
+    <h1>Runs</h1>
+
+    <!--
+      Both regions are in the markup at load, empty. That is the whole point: a region
+      created at the same moment as its text is not announced, because the screen reader
+      has nothing to compare the new content against. Ship the container, fill it later.
+    -->
+    <p id="status" role="status" aria-live="polite"></p>
+    <p id="alert" role="alert"></p>
+
+    <ul id="runs"><li>Nothing loaded yet.</li></ul>
+  </main>
+
+  <script>
+    const status = document.getElementById('status');
+    const alertRegion = document.getElementById('alert');
+    const runs = document.getElementById('runs');
+
+    const states = {
+      // aria-busy stays set while the work is outstanding, and the manifest declares that
+      // with "busy": true so the gate does not read it as a flag left stuck.
+      loading() {
+        status.setAttribute('aria-busy', 'true');
+        status.textContent = 'Loading runs…';
+        runs.innerHTML = '<li>…</li>';
+      },
+      // An error interrupts, so it goes to the assertive region — declared "kind": "alert".
+      error() {
+        status.setAttribute('aria-busy', 'false');
+        status.textContent = '';
+        alertRegion.textContent = 'Could not load runs. Try again.';
+        runs.innerHTML = '<li>No runs.</li>';
+      },
+      // A routine result waits its turn, so it goes to the polite region.
+      success() {
+        status.setAttribute('aria-busy', 'false');
+        alertRegion.textContent = '';
+        runs.innerHTML = '<li>run-104 passed</li><li>run-103 passed</li><li>run-102 failed</li>';
+        status.textContent = 'Loaded 3 runs.';
+      },
+    };
+
+    // The test hook autospec drives. Exposing it costs one object; without it the gate can
+    // only inspect the page as loaded, and content present at load is never announced by
+    // any screen reader — so the interesting half of the check would be unreachable.
+    window.__autospec = {
+      setState(name) {
+        if (!states[name]) throw new Error('unknown state: ' + name);
+        states[name]();
+      },
+    };
+  </script>
+</body>
+</html>

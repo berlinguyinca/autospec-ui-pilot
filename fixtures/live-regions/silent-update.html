@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Updates without saying so</title></head>
+<body>
+  <main><ul id="runs"><li>Nothing loaded yet.</li></ul></main>
+  <script>
+    // LIVE_REGION_ABSENT. The page rewrites its content and a screen-reader user is told
+    // nothing: focus has not moved, so there is no reason for the change to be read out.
+    // This is the common case, and no static lint can see it.
+    window.__autospec = {
+      setState() {
+        document.getElementById('runs').innerHTML =
+          '<li>run-104 passed</li><li>run-103 passed</li><li>run-102 failed</li>';
+      },
+    };
+  </script>
+</body>
+</html>

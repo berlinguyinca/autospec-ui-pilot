@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>A hook that does nothing</title></head>
+<body>
+  <main><ul id="runs"><li>Nothing loaded yet.</li></ul></main>
+  <script>
+    // TEST_HOOK_NO_EFFECT. The hook exists and the page never changes, so there is no
+    // state to judge. Almost always a stale state name in the manifest rather than an
+    // accessibility defect — reported separately for exactly that reason.
+    window.__autospec = { setState() {} };
+  </script>
+</body>
+</html>

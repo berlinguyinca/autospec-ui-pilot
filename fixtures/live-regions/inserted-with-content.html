@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Region created with its text</title></head>
+<body>
+  <main><ul id="runs"><li>Nothing loaded yet.</li></ul></main>
+  <script>
+    // LIVE_REGION_INSERTED_WITH_CONTENT. The region and its text enter the page together,
+    // so there is no change for a screen reader to observe and nothing is announced. The
+    // fix is states.html: put the empty region in the markup and fill it here.
+    window.__autospec = {
+      setState() {
+        document.getElementById('runs').innerHTML = '<li>run-104 passed</li>';
+        const region = document.createElement('p');
+        region.setAttribute('role', 'status');
+        region.textContent = 'Loaded 1 run.';
+        document.querySelector('main').appendChild(region);
+      },
+    };
+  </script>
+</body>
+</html>

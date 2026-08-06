@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Declared in the manifest, never exposed</title></head>
+<body>
+  <main><ul id="runs"><li>Nothing loaded yet.</li></ul></main>
+  <!--
+    TEST_HOOK_MISSING. The manifest names a route and states, and the page never exposes
+    window.__autospec. Reported as a missing hook rather than as a silent live region: they
+    are different bugs, and conflating them sends the author after the wrong one.
+  -->
+</body>
+</html>

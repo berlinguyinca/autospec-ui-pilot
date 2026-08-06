@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "hook": "__autospec.setState",
+  "routes": [
+    {
+      "route": "/states.html",
+      "states": [
+        { "name": "loading", "kind": "status", "busy": true },
+        { "name": "error",   "kind": "alert" },
+        { "name": "success", "kind": "status" }
+      ]
+    }
+  ]
+}

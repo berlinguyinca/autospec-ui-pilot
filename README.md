@@ -18,13 +18,18 @@ calibrated against a codebase with no motion.
 ## Layout
 
     index.html                     the compliant reference page
+    states.html                    the compliant test-hook reference: drivable app states
     styles/tokens.css              design tokens: duration scale, easing, colour
     styles/motion.css              animation, with its reduced-motion guard alongside
     styles/components.css          hover affordances, each with a focus equivalent
     fixtures/violations/           one file per rule, each expected to be flagged
     fixtures/known-gaps/           cases the rules get wrong, in both directions
+    fixtures/live-regions/         one route per announcement rule, driven through the hook
+    .autospec/ui-test-hooks.json   the states this repository declares as drivable
     EXPECTED.tsv                   path, rule id, verdict — the calibration contract
-    check.sh                       runs the gate and diffs it against the contract
+    EXPECTED-live.tsv              the same contract for the announcement gate
+    check.sh                       runs the static gate and diffs it against the contract
+    check-liveregions.sh           serves the pages, drives every state, diffs the result
 
 `EXPECTED.tsv` is the point of the repository. Each row states what a file should draw, so
 running the gates here yields a number rather than an impression. A rule that stops
@@ -119,6 +124,68 @@ A keyframe animation reports `["opacity", "transform"]` while a colour-only tran
 reports nothing, so the check requires a property that *moves* something; `both`-filled
 animations stay listed as `finished` after they end, so probing after load still sees a
 page that animated on entry.
+
+## Live-region announcements, and the test hook they need
+
+`ui-liveregion-evidence.mjs` is the first gate that needs this repository to *cooperate*.
+Every tier above reads a page; this one drives it.
+
+It has to. What is worth checking about a live region is a **transition** — content already
+present when the page loads is never announced by any screen reader, so a state reached by
+reloading with a query parameter can only be inspected statically, and the interesting half
+of the question is unreachable. The app has to be able to say "put me in the error state".
+
+`states.html` is that reference, and it is what an application copies:
+
+```js
+window.__autospec = {
+  setState(name) { states[name](); },
+};
+```
+
+`.autospec/ui-test-hooks.json` declares what to drive:
+
+```json
+{ "route": "/states.html",
+  "states": [ { "name": "loading", "kind": "status", "busy": true },
+              { "name": "error",   "kind": "alert" },
+              { "name": "success", "kind": "status" } ] }
+```
+
+Two fields are declared rather than inferred, and both were forced by building the corpus:
+
+- **`kind`** — assertive is right for an error and wrong for a routine result, and deciding
+  that from a *state name* is a regex pretending to be a judgement. "error" is obvious;
+  "timeout", "partial" and "validation-failed" are not.
+- **`busy`** — a loading state is *supposed* to leave `aria-busy` set. Within a single
+  driven state that is indistinguishable from a flag left stuck, so the honest options were
+  to declare it or to drop the rule.
+
+Run it with `./check-liveregions.sh ./autospec`, which serves this directory, drives every
+declared state, and diffs the result against `EXPECTED-live.tsv`:
+
+    check-liveregions.sh: OK — 10 rows match the contract
+
+The corpus in `fixtures/live-regions/` carries one route per rule. The one worth
+understanding is `inserted-with-content.html`, because it looks correct:
+
+```js
+const region = document.createElement('p');
+region.setAttribute('role', 'status');
+region.textContent = 'Loaded 1 run.';       // ← the bug
+document.querySelector('main').appendChild(region);
+```
+
+The region and its text enter the page together, so there is no change for a screen reader
+to observe and nothing is announced. `states.html` differs only in shipping the empty
+region in the markup and filling it later.
+
+That distinction is also where the gate was nearly wrong. A region appended empty and
+filled on a *later* task emits the same insertion event, so "any inserted region is a bug"
+fails the correct dynamic pattern. Measuring the two in Chromium showed the discriminator
+is whether the region carried text when the observer's records were delivered — which lands
+exactly on the frame boundary a screen reader uses, since a region created and filled within
+one task is not announced either. Both cases are checked in, and both are load-bearing.
 
 ## Why the gaps are checked in rather than filed
 

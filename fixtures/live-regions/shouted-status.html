@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Routine result announced assertively</title></head>
+<body>
+  <main>
+    <p id="status" aria-live="assertive"></p>
+    <ul id="runs"><li>Nothing loaded yet.</li></ul>
+  </main>
+  <script>
+    // LIVE_REGION_WRONG_POLITENESS. An assertive region interrupts whatever the screen
+    // reader is currently saying, mid-word. That is right for an error and wrong for a
+    // routine result — which is why the manifest declares the kind rather than letting the
+    // gate guess it from a state name.
+    window.__autospec = {
+      setState() {
+        document.getElementById('runs').innerHTML = '<li>run-104 passed</li>';
+        document.getElementById('status').textContent = 'Loaded 1 run.';
+      },
+    };
+  </script>
+</body>
+</html>

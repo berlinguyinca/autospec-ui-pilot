@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><title>Announced into a hidden region</title>
+  <style>
+    /* display:none removes the region from the accessibility tree entirely. */
+    .gone { display: none; }
+    /* The correct way to hide an announcement visually: it stays in the tree and stays
+       announced. Filled below alongside the broken one, so this file also proves the gate
+       does not report it. */
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  </style>
+</head>
+<body>
+  <main>
+    <p id="gone" class="gone" role="status" aria-live="polite"></p>
+    <p id="quiet" class="sr-only" role="status" aria-live="polite"></p>
+    <ul id="runs"><li>Nothing loaded yet.</li></ul>
+  </main>
+  <script>
+    // LIVE_REGION_HIDDEN, once — for #gone only. The author did remember the region and
+    // did fill it at the right moment, but display:none means no screen reader will read
+    // it. #quiet is hidden the right way and must draw nothing.
+    window.__autospec = {
+      setState() {
+        document.getElementById('runs').innerHTML = '<li>run-104 passed</li>';
+        document.getElementById('gone').textContent = 'Loaded 1 run.';
+        document.getElementById('quiet').textContent = 'Loaded 1 run.';
+      },
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "hook": "__autospec.setState",
+  "routes": [
+    { "route": "/fixtures/live-regions/inserted-with-content.html", "states": ["success"] },
+    { "route": "/fixtures/live-regions/silent-update.html",         "states": ["success"] },
+    { "route": "/fixtures/live-regions/hidden-region.html",         "states": ["success"] },
+    { "route": "/fixtures/live-regions/stuck-busy.html",            "states": ["success"] },
+    { "route": "/fixtures/live-regions/shouted-status.html",        "states": ["success"] },
+    { "route": "/fixtures/live-regions/no-hook.html",               "states": ["success"] },
+    { "route": "/fixtures/live-regions/inert-hook.html",            "states": ["success"] }
+  ]
+}

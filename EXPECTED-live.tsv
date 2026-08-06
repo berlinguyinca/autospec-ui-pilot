@@ -1,0 +1,35 @@
+# The calibration contract for autospec's live-region gate, measured against
+# skills/autospec-shared/scripts/ui-liveregion-evidence.mjs.
+#
+# This tier differs from the lint corpus in EXPECTED.tsv: it cannot read files, it has to
+# drive the app. Every route below exposes window.__autospec.setState, and the gate calls
+# it and watches what a screen reader would have been told. Run ./check-liveregions.sh.
+#
+# A rule id of "-" means no finding is expected for that route.
+#
+# route	rule
+
+# The reference implementation. Three states, three clean announcements — including a
+# loading state that correctly stays aria-busy, declared in .autospec/ui-test-hooks.json so
+# the gate does not read it as a flag left stuck.
+/states.html[loading]	-
+/states.html[error]	-
+/states.html[success]	-
+
+# The corpus. One route per rule, so a rule that stops firing is visible as one row.
+/fixtures/live-regions/inserted-with-content.html[success]	LIVE_REGION_INSERTED_WITH_CONTENT
+/fixtures/live-regions/silent-update.html[success]	LIVE_REGION_ABSENT
+/fixtures/live-regions/hidden-region.html[success]	LIVE_REGION_HIDDEN
+/fixtures/live-regions/stuck-busy.html[success]	LIVE_REGION_STUCK_BUSY
+/fixtures/live-regions/shouted-status.html[success]	LIVE_REGION_WRONG_POLITENESS
+/fixtures/live-regions/no-hook.html[success]	TEST_HOOK_MISSING
+/fixtures/live-regions/inert-hook.html[success]	TEST_HOOK_NO_EFFECT
+
+# Two false-positive guards are carried inside fixtures rather than as rows of their own,
+# because the assertion is an absence:
+#
+#   hidden-region.html   also fills an .sr-only region, which is hidden the correct way and
+#                        stays in the accessibility tree. Exactly one HIDDEN row above, not
+#                        two, is what proves the gate leaves it alone.
+#   states.html[loading] leaves aria-busy set on purpose. A clean row is what proves the
+#                        manifest's "busy": true declaration is honoured.
