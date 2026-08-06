@@ -1,0 +1,25 @@
+- link "Skip to main content":
+  - /url: "#main-content"
+- banner:
+  - heading "Run summary" [level=1]
+  - paragraph: A deliberately plain page. Its purpose is to exercise every UI rule autospec ships and produce no findings, so a finding here means the gate is wrong.
+- main:
+  - region "Recent runs":
+    - heading "Recent runs" [level=2]
+    - list:
+      - listitem:
+        - text: Run 1841 passed
+        - link "Open run 1841":
+          - /url: /runs/1841
+      - listitem:
+        - text: Run 1840 failed on the accessibility workstream
+        - link "Open run 1840":
+          - /url: /runs/1840
+    - button "Retry run 1840"
+  - region "Filter":
+    - heading "Filter" [level=2]
+    - text: Branch
+    - textbox "Branch"
+    - button "Apply branch filter"
+- contentinfo:
+  - status: Two runs shown.

@@ -30,10 +30,12 @@ calibrated against a codebase with no motion.
     fixtures/live-regions/         one route per announcement rule — induce-*.html need no
                                    hook at all; the rest are driven through one
     .autospec/ui-test-hooks.json   the states this repository declares as drivable
+    .autospec/a11y-baselines/      committed accessibility trees, one per route
     EXPECTED.tsv                   path, rule id, verdict — the calibration contract
     EXPECTED-live.tsv              the same contract for the announcement gate
     check.sh                       runs the static gate and diffs it against the contract
     check-liveregions.sh           serves the pages, induces and drives every state, diffs
+    check-a11y.sh                  compares each page's accessibility tree to its baseline
 
 `EXPECTED.tsv` is the point of the repository. Each row states what a file should draw, so
 running the gates here yields a number rather than an impression. A rule that stops
@@ -216,6 +218,42 @@ fails the correct dynamic pattern. Measuring the two in Chromium showed the disc
 is whether the region carried text when the observer's records were delivered — which lands
 exactly on the frame boundary a screen reader uses, since a region created and filled within
 one task is not announced either. Both cases are checked in, and both are load-bearing.
+
+## Accessibility-tree baselines
+
+The gates above ask questions with fixed answers. This one asks whether these pages still
+expose what they used to, which is the only way to catch a *regression* rather than a
+violation — a `<button>` refactored into a clickable `<div>` satisfies the lint, the device
+profiles, the keyboard robot and axe.
+
+    ./check-a11y.sh ./autospec
+
+    ok /index.html: 22 nodes match the baseline
+    ok /runs.html: 8 nodes match the baseline
+    ok /states.html: 6 nodes match the baseline
+    check-a11y.sh: OK — trees match the committed baselines
+
+The trees live in `.autospec/a11y-baselines/`, committed. `runs.html` is worth reading,
+because it shows what a baseline captures once the page has settled rather than at `load`:
+
+    - main:
+      - heading "Runs" [level=1]
+      - status: Loaded 3 runs.
+      - alert
+      - list:
+        - listitem: run-104 passed
+
+Deleting that `h1` — replacing it with a styled `div`, the most ordinary refactor there is —
+reports `A11Y_ROLE_LOST`. Nothing else in the pipeline notices.
+
+Two properties make this usable rather than noisy, and both were measured before the gate was
+designed. Renaming a class, wrapping a table in a scroll container, reordering attributes and
+renaming an id all leave the tree **byte-identical**. And the format separates an accessible
+name (quoted) from mere content (after a colon), so `listitem: run-104 passed` carries no
+name and a data change cannot report a lost one.
+
+Accepting an intentional change is `./check-a11y.sh ./autospec --update`, then reading and
+committing the diff — a reviewable act rather than a silent one.
 
 ## Why the gaps are checked in rather than filed
 
