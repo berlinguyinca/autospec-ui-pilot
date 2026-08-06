@@ -77,6 +77,32 @@ Motion in `styles/motion.css` follows the `## Motion` contract from
 scale, one easing per intent, an explicit list of what never animates, and a per-pattern
 reduced-motion fallback that is opacity-only rather than absent.
 
+## Runtime motion evidence
+
+The static gate above judges source. `ui-motion-evidence.mjs` judges the running page: it
+renders each route twice, once normally and once with `prefers-reduced-motion: reduce`,
+and asserts that motion exists by default, stops under the preference, and does not run
+unbounded.
+
+    python3 -m http.server 8731 --bind 127.0.0.1 &
+    node autospec/skills/autospec-shared/scripts/ui-motion-evidence.mjs \
+      --base-url http://127.0.0.1:8731 \
+      --routes /index.html /fixtures/known-gaps/viewport-prose.html
+
+    ok /index.html: moves [panel-enter, row-enter, row-enter], still under reduce
+    MOTION_ABSENT:/fixtures/known-gaps/viewport-prose.html: nothing moves on this route by default
+
+That contrast is the whole point. `viewport-prose.html` is a correct, accessible, entirely
+static page: it satisfies the token linter, it would satisfy axe, and a vision judge would
+find nothing to object to. `MOTION_ABSENT` is the only assertion in the pipeline that
+fails it — which is why `index.html` here animates rather than merely being tidy.
+
+The probe was measured against these files before the assertions were written around it.
+A keyframe animation reports `["opacity", "transform"]` while a colour-only transition
+reports nothing, so the check requires a property that *moves* something; `both`-filled
+animations stay listed as `finished` after they end, so probing after load still sees a
+page that animated on entry.
+
 ## Why the gaps are checked in rather than filed
 
 A fixture that reproduces a defect keeps being true. An issue describing one goes stale
