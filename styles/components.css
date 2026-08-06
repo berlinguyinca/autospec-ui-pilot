@@ -75,6 +75,23 @@ body {
   outline-offset: 2px;
 }
 
+/* Text inputs need the same target treatment as buttons. Left to the user agent, this
+   input rendered 21px tall — under the 24px WCAG 2.5.8 minimum — while every static rule
+   passed, because no stylesheet can know a control's rendered height. The runtime device
+   gate measured it. */
+.input {
+  min-height: 44px;
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--space-1);
+  font: inherit;
+}
+
+.input:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
 .link {
   color: var(--color-accent);
   text-underline-offset: 2px;
