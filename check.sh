@@ -56,8 +56,19 @@ awk -F'\t' '
   }
 ' "$HERE/EXPECTED.tsv" | sort -u > "$CONTRACT"
 
+# The cross-file case, which a per-file table cannot express: a component that reports
+# alone must fall silent when linted alongside the global reset that guards it.
+set_out="$(bash "$LINT" "$HERE/fixtures/known-gaps/global-reset.css" \
+                        "$HERE/fixtures/known-gaps/card-motion.css" 2>&1)"
+if printf '%s\n' "$set_out" | grep -q 'UI_NO_REDUCED_MOTION'; then
+  echo "card-motion.css still reports when linted with the reset that guards it:"
+  printf '%s\n' "$set_out"
+  exit 1
+fi
+
 if diff -u "$CONTRACT" "$OBSERVED" > /dev/null; then
-  printf 'UI gate matches EXPECTED.tsv (%d rows)\n' "$(wc -l < "$CONTRACT" | tr -d ' ')"
+  printf 'UI gate matches EXPECTED.tsv (%d rows), and the cross-file reset case is clear\n' \
+    "$(wc -l < "$CONTRACT" | tr -d ' ')"
   exit 0
 fi
 

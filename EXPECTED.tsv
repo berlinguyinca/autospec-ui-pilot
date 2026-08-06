@@ -10,12 +10,12 @@
 # either way wants a look.
 #
 # History. The first run of this corpus, against autospec at d3e0fbd3, recorded four gaps
-# here plus an exit-code collision. All but one were fixed in autospec#2964:
+# here plus an exit-code collision. All five are now closed:
 #
 #   comment-silences-motion.css   missed    -> correct
 #   viewport-prose.html           over-fire -> correct
 #   hex-in-shorthand.css          missed    -> correct
-#   card-motion.css               over-fire -> unchanged, see below
+#   card-motion.css               over-fire -> correct, in autospec#2967
 #
 # path	rule	verdict	note
 
@@ -38,4 +38,4 @@ fixtures/known-gaps/global-reset.css	-	correct	a guard with no motion of its own
 fixtures/known-gaps/comment-silences-motion.css	UI_NO_REDUCED_MOTION	correct	fixed: comments are stripped before the guard flag is set
 fixtures/known-gaps/viewport-prose.html	-	correct	fixed: the directives are read only inside a viewport meta tag
 fixtures/known-gaps/hex-in-shorthand.css	UI_RAW_HEX	correct	fixed: hex anywhere in a value, including the 8-digit alpha form
-fixtures/known-gaps/card-motion.css	UI_NO_REDUCED_MOTION	over-fire	guard lives in global-reset.css; the rule is decided per file
+fixtures/known-gaps/card-motion.css	UI_NO_REDUCED_MOTION	correct	fixed: reports alone, and is cleared when linted with global-reset.css — see check.sh

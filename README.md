@@ -53,17 +53,34 @@ Five defects, inside an hour of the repository existing. Four are fixed in
 | `UI_FIXED_VIEWPORT` over-fired on prose — the compliant page here tripped it with a comment explaining that it *avoids* `user-scalable=no` | fixed |
 | `UI_RAW_HEX` matched a literal only directly after the colon, missing `border: 1px solid #ccc`, gradient stops, `var()` fallbacks, and the 8-digit alpha form | fixed |
 | `lint-ui.sh` exited 2 for both "the interpreter died" and "this file has two findings" | fixed, now 99 |
-| `UI_NO_REDUCED_MOTION` over-fires across files — a global reset with unguarded components, the ordinary way to organise CSS, is still reported | open |
+| `UI_NO_REDUCED_MOTION` over-fired across files — a global reset with unguarded components, the ordinary way to organise CSS, drew a finding on every component | fixed |
 
-The first two shared a cause: the rules read comments as code. The silencing one is the
-one worth remembering — a false positive costs an afternoon, that one lost an
-accessibility finding quietly. It surfaced because the corpus's *intended*
+All five are closed. The first two shared a cause: the rules read comments as code. The
+silencing one is the one worth remembering — a false positive costs an afternoon, that one
+lost an accessibility finding quietly. It surfaced because the corpus's *intended*
 `UI_NO_REDUCED_MOTION` violation came back clean: the comment explaining what was missing
 was itself what suppressed the finding.
 
-The open case needs the set of stylesheets that load together, which a
-one-awk-pass-per-file design does not have. `fixtures/known-gaps/card-motion.css` holds it
-so the day it changes is visible.
+The cross-file case is now satisfied by a reset targeting the universal selector, which
+genuinely guards every element on the page. A component linted alone still reports, since
+one file cannot carry evidence of a reset living in another — `check.sh` asserts both
+halves, because a per-file table cannot express a rule that depends on the set.
+
+## Runtime device evidence
+
+`ui-device-evidence.mjs` renders each route across real device descriptors — iPhone, iPad
+in both orientations, Pixel, desktop — and runs reflow at 320 CSS px and 200% zoom.
+
+    node autospec/skills/autospec-shared/scripts/ui-device-evidence.mjs \
+      --base-url http://127.0.0.1:8731 --routes /index.html
+
+    ok /index.html: 5 profiles, reflow 320px, zoom 640px
+
+This tier found a defect in `index.html` that every static rule missed: the branch filter
+input rendered 185x21, under the 24px WCAG 2.5.8 minimum, on all four coarse-pointer
+profiles. `components.css` sets `min-height` on `.button` and said nothing about inputs,
+and a control's rendered size depends on the user agent — no amount of source analysis
+reaches it. That is the argument for measuring the running page.
 
 ## The compliant page is not a demo
 
