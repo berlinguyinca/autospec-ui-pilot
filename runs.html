@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Runs — the induction reference</title>
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/components.css">
+</head>
+<body>
+  <main>
+    <h1>Runs</h1>
+
+    <!--
+      The reference for the gate that needs no cooperation at all. autospec holds this
+      page's fetch to watch the pending state, then releases it — once normally and once as
+      a 500 — and checks what a screen-reader user is told each time.
+
+      Nothing here is test scaffolding. This is just a page that fetches data and handles
+      both outcomes, which is the point: induction measures ordinary code.
+    -->
+    <p id="status" role="status" aria-live="polite" aria-busy="true">Loading runs…</p>
+    <p id="alert" role="alert"></p>
+
+    <ul id="runs"><li>…</li></ul>
+  </main>
+
+  <script>
+    const status = document.getElementById('status');
+    const alertRegion = document.getElementById('alert');
+    const list = document.getElementById('runs');
+
+    fetch('api/runs.json')
+      .then((response) => {
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        return response.json();
+      })
+      .then((runs) => {
+        // aria-busy is cleared as soon as the work is done. Left set, it suppresses the
+        // announcement below indefinitely.
+        status.setAttribute('aria-busy', 'false');
+        list.innerHTML = runs.map((run) => '<li>' + run + '</li>').join('');
+        // Filled after the region already existed, which is what makes it announced.
+        status.textContent = 'Loaded ' + runs.length + ' runs.';
+      })
+      .catch(() => {
+        status.setAttribute('aria-busy', 'false');
+        status.textContent = '';
+        // An error interrupts, so it goes to the assertive region.
+        alertRegion.textContent = 'Could not load runs. Try again.';
+        list.innerHTML = '<li>No runs.</li>';
+      });
+  </script>
+</body>
+</html>

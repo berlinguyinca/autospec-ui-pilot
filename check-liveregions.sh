@@ -28,7 +28,15 @@ trap cleanup EXIT
 
 # A port the kernel hands out, so concurrent checkouts do not collide.
 PORT="$(python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); print(s.getsockname()[1]); s.close()')"
-python3 -m http.server "$PORT" --bind 127.0.0.1 --directory "$HERE" >/dev/null 2>&1 &
+# Threaded on purpose. python3 -m http.server is single-threaded, and a real browser holds
+# keep-alive connections open — which deadlocks it partway through a run, so the gate hangs
+# on a server limitation rather than on anything about the pages.
+python3 -c "
+import sys, functools
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+handler = functools.partial(SimpleHTTPRequestHandler, directory=sys.argv[2])
+ThreadingHTTPServer(('127.0.0.1', int(sys.argv[1])), handler).serve_forever()
+" "$PORT" "$HERE" >/dev/null 2>&1 &
 SERVER_PID=$!
 
 # Wait for the server rather than sleeping a guessed interval.
@@ -41,9 +49,23 @@ if ! curl -fsS "http://127.0.0.1:$PORT/states.html" >/dev/null 2>&1; then
   exit 2
 fi
 
-# Observed: "route[state]<TAB>rule" per finding, plus "route[state]<TAB>-" for a clean one.
-for manifest in "$HERE/.autospec/ui-test-hooks.json" "$HERE/fixtures/live-regions/hooks.json"; do
-  node "$GATE" --base-url "http://127.0.0.1:$PORT" --manifest "$manifest" --json "$REPORT" >/dev/null 2>&1
+# Routes driven by induction alone — no manifest entry, no hook, nothing added to the page.
+INDUCED_ROUTES="/runs.html /fixtures/live-regions/induce-silent.html /fixtures/live-regions/induce-ignored.html /index.html"
+
+# Observed: "route[state]<TAB>rule" per finding, "route[state]<TAB>-" for a clean state, and
+# "route<TAB>SKIPPED" for a route with nothing to induce.
+#
+# Three passes: induction with no manifest at all, then each manifest with induction off, so
+# every row names exactly which mechanism produced it.
+for pass in "induce" "$HERE/.autospec/ui-test-hooks.json" "$HERE/fixtures/live-regions/hooks.json"; do
+  if [ "$pass" = "induce" ]; then
+    # shellcheck disable=SC2086
+    node "$GATE" --base-url "http://127.0.0.1:$PORT" --routes $INDUCED_ROUTES \
+      --manifest /nonexistent --json "$REPORT" >/dev/null 2>&1
+  else
+    node "$GATE" --base-url "http://127.0.0.1:$PORT" --no-induce --manifest "$pass" \
+      --json "$REPORT" >/dev/null 2>&1
+  fi
   status=$?
   # 3 is "Playwright unavailable, nothing was collected" — an unknown, not a pass, so it
   # must not be allowed to look like a clean run.
@@ -64,6 +86,8 @@ for row in report.get("states", []):
     key = f"{row['route']}[{row['state']}]"
     if key not in seen:
         print(f"{key}\t-")
+for row in report.get("skipped", []):
+    print(f"{row['route']}\tSKIPPED")
 PY
 done
 

@@ -1,22 +1,52 @@
 # The calibration contract for autospec's live-region gate, measured against
-# skills/autospec-shared/scripts/ui-liveregion-evidence.mjs.
+# skills/autospec-shared/scripts/ui-liveregion-{evidence,induce}.mjs.
 #
-# This tier differs from the lint corpus in EXPECTED.tsv: it cannot read files, it has to
-# drive the app. Every route below exposes window.__autospec.setState, and the gate calls
-# it and watches what a screen reader would have been told. Run ./check-liveregions.sh.
+# This tier cannot read files; it has to drive the app. It does that two ways, and the two
+# halves are listed separately below because they demand very different things of a repo.
 #
-# A rule id of "-" means no finding is expected for that route.
+# Run ./check-liveregions.sh.
 #
-# route	rule
+# A rule id of "-" means no finding is expected for that state. A route line with SKIPPED
+# means the route had nothing to induce.
+#
+# route[state]	rule
 
-# The reference implementation. Three states, three clean announcements — including a
-# loading state that correctly stays aria-busy, declared in .autospec/ui-test-hooks.json so
-# the gate does not read it as a flag left stuck.
+# ── Induced: nothing added to these pages ────────────────────────────────────────
+#
+# No hook, no manifest entry, no test attribute. autospec holds each page's own fetch to
+# watch its pending state, then releases it once normally and once as a 500. Every row here
+# is produced from ordinary application code, which is the point: this half measures repos
+# that have never heard of the gate.
+
+# The reference. Announces both outcomes and clears aria-busy.
+/runs.html[success]	-
+/runs.html[error]	-
+
+# Replaces the list, says nothing, and leaves aria-busy set — so even a later announcement
+# would be suppressed. Sighted users see the new rows; nobody else is told.
+/fixtures/live-regions/induce-silent.html[success]	LIVE_REGION_ABSENT
+/fixtures/live-regions/induce-silent.html[success]	LIVE_REGION_STUCK_BUSY
+/fixtures/live-regions/induce-silent.html[error]	INDUCED_STATE_IGNORED
+
+# Handles success correctly and has no error path at all. The failed request produces
+# nothing: no render, no message, no indication. This is the row that argues for induction
+# over a manifest — nobody declares an "error" state for a failure they forgot to handle.
+/fixtures/live-regions/induce-ignored.html[success]	-
+/fixtures/live-regions/induce-ignored.html[error]	INDUCED_STATE_IGNORED
+
+# A static page makes no data request, so there is no state to drive. Recorded as skipped
+# with a reason, which is different from being checked and found clean.
+/index.html	SKIPPED
+
+# ── Declared: states no request can produce ──────────────────────────────────────
+#
+# Form validation, optimistic updates, client-side route changes. Induction cannot reach
+# these, so they are declared in .autospec/ui-test-hooks.json and driven through the hook.
+
 /states.html[loading]	-
 /states.html[error]	-
 /states.html[success]	-
 
-# The corpus. One route per rule, so a rule that stops firing is visible as one row.
 /fixtures/live-regions/inserted-with-content.html[success]	LIVE_REGION_INSERTED_WITH_CONTENT
 /fixtures/live-regions/silent-update.html[success]	LIVE_REGION_ABSENT
 /fixtures/live-regions/hidden-region.html[success]	LIVE_REGION_HIDDEN
@@ -29,11 +59,14 @@
 # it does not know, so a manifest carrying a typo produces it exactly as a real one would.
 /states.html[sucess]	TEST_HOOK_FAILED
 
-# Two false-positive guards are carried inside fixtures rather than as rows of their own,
-# because the assertion is an absence:
+# ── False-positive guards ────────────────────────────────────────────────────────
 #
-#   hidden-region.html   also fills an .sr-only region, which is hidden the correct way and
-#                        stays in the accessibility tree. Exactly one HIDDEN row above, not
-#                        two, is what proves the gate leaves it alone.
-#   states.html[loading] leaves aria-busy set on purpose. A clean row is what proves the
-#                        manifest's "busy": true declaration is honoured.
+# Carried inside fixtures rather than as rows, because each assertion is an absence:
+#
+#   hidden-region.html    also fills an .sr-only region, hidden the correct way and still in
+#                         the accessibility tree. Exactly one HIDDEN row above, not two, is
+#                         what proves the gate leaves it alone.
+#   states.html[loading]  leaves aria-busy set on purpose. A clean row proves the manifest's
+#                         "busy": true declaration is honoured.
+#   runs.html             holds aria-busy through its pending state and clears it on arrival.
+#                         Two clean rows prove induction does not punish correct loading.

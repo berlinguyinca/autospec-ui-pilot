@@ -18,18 +18,22 @@ calibrated against a codebase with no motion.
 ## Layout
 
     index.html                     the compliant reference page
+    runs.html                      the induction reference: ordinary data-driven code,
+                                   nothing added for the gate
     states.html                    the compliant test-hook reference: drivable app states
+    api/runs.json                  the data runs.html fetches, and the gate intercepts
     styles/tokens.css              design tokens: duration scale, easing, colour
     styles/motion.css              animation, with its reduced-motion guard alongside
     styles/components.css          hover affordances, each with a focus equivalent
     fixtures/violations/           one file per rule, each expected to be flagged
     fixtures/known-gaps/           cases the rules get wrong, in both directions
-    fixtures/live-regions/         one route per announcement rule, driven through the hook
+    fixtures/live-regions/         one route per announcement rule — induce-*.html need no
+                                   hook at all; the rest are driven through one
     .autospec/ui-test-hooks.json   the states this repository declares as drivable
     EXPECTED.tsv                   path, rule id, verdict — the calibration contract
     EXPECTED-live.tsv              the same contract for the announcement gate
     check.sh                       runs the static gate and diffs it against the contract
-    check-liveregions.sh           serves the pages, drives every state, diffs the result
+    check-liveregions.sh           serves the pages, induces and drives every state, diffs
 
 `EXPECTED.tsv` is the point of the repository. Each row states what a file should draw, so
 running the gates here yields a number rather than an impression. A rule that stops
@@ -125,17 +129,43 @@ reports nothing, so the check requires a property that *moves* something; `both`
 animations stay listed as `finished` after they end, so probing after load still sees a
 page that animated on entry.
 
-## Live-region announcements, and the test hook they need
+## Live-region announcements
 
-`ui-liveregion-evidence.mjs` is the first gate that needs this repository to *cooperate*.
-Every tier above reads a page; this one drives it.
+Every tier above reads a page; this one drives it. What is worth checking about a live
+region is a **transition** — content already present when the page loads is never announced
+by any screen reader — so the gate has to make the state change happen.
 
-It has to. What is worth checking about a live region is a **transition** — content already
-present when the page loads is never announced by any screen reader, so a state reached by
-reloading with a query parameter can only be inspected statically, and the interesting half
-of the question is unreachable. The app has to be able to say "put me in the error state".
+It does that two ways, and `runs.html` is the one that matters most, because **nothing was
+added to it**. No hook, no manifest entry, no test attribute. It is an ordinary page that
+fetches data and handles both outcomes:
 
-`states.html` is that reference, and it is what an application copies:
+```js
+fetch('api/runs.json')
+  .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+  .then((runs) => { status.setAttribute('aria-busy', 'false'); render(runs);
+                    status.textContent = 'Loaded ' + runs.length + ' runs.'; })
+  .catch(() => { alertRegion.textContent = 'Could not load runs. Try again.'; });
+```
+
+autospec holds that fetch to watch the pending state, then releases it — once normally, once
+as a 500 — and checks what a screen-reader user is told each time. The app runs its own
+state machine. Nothing is clicked and nothing is mutated.
+
+`fixtures/live-regions/induce-ignored.html` is the case that argues for this over a
+declaration. It handles success correctly and has no `.catch` at all, so a failed request
+produces *nothing*: no render, no message, no indication. The page sits on "Nothing loaded
+yet." forever. Nobody writes a declared "error" state for a failure path they forgot to
+handle, so a manifest-driven gate could only ever have checked the error handling that
+already existed.
+
+A page that makes no data request is reported as skipped with a reason. `index.html` is
+static; it has no state to drive, and saying so is different from saying it was checked.
+
+## The declared half, for what induction cannot reach
+
+Form validation, optimistic updates, client-side route changes, empty states — no request
+produces any of them, so no interception can induce them. Those are declared, and
+`states.html` is the reference an application copies:
 
 ```js
 window.__autospec = {

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Loads data, says nothing</title></head>
+<body>
+  <main>
+    <p id="status" role="status" aria-live="polite" aria-busy="true">Loading runs…</p>
+    <ul id="runs"><li>…</li></ul>
+  </main>
+  <script>
+    // LIVE_REGION_ABSENT, plus LIVE_REGION_STUCK_BUSY: the list is replaced, the status
+    // region is never filled, and aria-busy is never cleared. A sighted user sees the new
+    // rows; a screen-reader user is told nothing and is still waiting.
+    //
+    // No manifest declares this page and no hook exists on it. It is caught because the
+    // gate fails its request for it.
+    fetch('../../api/runs.json')
+      .then((r) => r.json())
+      .then((runs) => {
+        document.getElementById('runs').innerHTML = runs.map((x) => '<li>' + x + '</li>').join('');
+      });
+  </script>
+</body>
+</html>
