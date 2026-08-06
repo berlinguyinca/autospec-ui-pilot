@@ -8,6 +8,7 @@
     { "route": "/fixtures/live-regions/stuck-busy.html",            "states": ["success"] },
     { "route": "/fixtures/live-regions/shouted-status.html",        "states": ["success"] },
     { "route": "/fixtures/live-regions/no-hook.html",               "states": ["success"] },
-    { "route": "/fixtures/live-regions/inert-hook.html",            "states": ["success"] }
+    { "route": "/fixtures/live-regions/inert-hook.html",            "states": ["success"] },
+    { "route": "/states.html",                                      "states": ["sucess"] }
   ]
 }

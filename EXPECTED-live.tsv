@@ -25,6 +25,10 @@
 /fixtures/live-regions/no-hook.html[success]	TEST_HOOK_MISSING
 /fixtures/live-regions/inert-hook.html[success]	TEST_HOOK_NO_EFFECT
 
+# TEST_HOOK_FAILED needs no fixture of its own: states.html already throws on a state name
+# it does not know, so a manifest carrying a typo produces it exactly as a real one would.
+/states.html[sucess]	TEST_HOOK_FAILED
+
 # Two false-positive guards are carried inside fixtures rather than as rows of their own,
 # because the assertion is an absence:
 #
